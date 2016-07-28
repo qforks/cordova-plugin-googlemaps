@@ -1076,9 +1076,7 @@ App.prototype.addMarkers = function(markersOptions, callback) {
 
       // get an associated object
       var markerResult = result[i];
-      if(i == 1){
-        console.log(markerOptions);
-      }
+    
       // error has occurred while creating a marker
       if(typeof markerResult === 'undefined' || !markerResult.hashCode && markerResult.errorMsg){
         continue;
