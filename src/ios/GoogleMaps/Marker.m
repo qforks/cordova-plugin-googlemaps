@@ -26,33 +26,33 @@
 -(void)createMarker:(CDVInvokedUrlCommand *)command markerOptions:(NSDictionary *)markerOptions externalCommandDelegate:(ExternalCommandDelegate) externalDelegate
 {
 
-  NSDictionary *latLng = [json objectForKey:@"position"];
+  NSDictionary *latLng = [markerOptions objectForKey:@"position"];
   float latitude = [[latLng valueForKey:@"lat"] floatValue];
   float longitude = [[latLng valueForKey:@"lng"] floatValue];
 
   CLLocationCoordinate2D position = CLLocationCoordinate2DMake(latitude, longitude);
   GMSMarker *marker = [GMSMarker markerWithPosition:position];
-  if ([json valueForKey:@"title"]) {
-    [marker setTitle: [json valueForKey:@"title"]];
+  if ([markerOptions valueForKey:@"title"]) {
+    [marker setTitle: [markerOptions valueForKey:@"title"]];
   }
-  if ([json valueForKey:@"snippet"]) {
-    [marker setSnippet: [json valueForKey:@"snippet"]];
+  if ([markerOptions valueForKey:@"snippet"]) {
+    [marker setSnippet: [markerOptions valueForKey:@"snippet"]];
   }
-  if ([json valueForKey:@"draggable"]) {
-    [marker setDraggable:[[json valueForKey:@"draggable"] boolValue]];
+  if ([markerOptions valueForKey:@"draggable"]) {
+    [marker setDraggable:[[markerOptions valueForKey:@"draggable"] boolValue]];
   }
-  if ([json valueForKey:@"flat"]) {
-    [marker setFlat:[[json valueForKey:@"flat"] boolValue]];
+  if ([markerOptions valueForKey:@"flat"]) {
+    [marker setFlat:[[markerOptions valueForKey:@"flat"] boolValue]];
   }
-  if ([json valueForKey:@"rotation"]) {
-    CLLocationDegrees degrees = [[json valueForKey:@"rotation"] doubleValue];
+  if ([markerOptions valueForKey:@"rotation"]) {
+    CLLocationDegrees degrees = [[markerOptions valueForKey:@"rotation"] doubleValue];
     [marker setRotation:degrees];
   }
-  if ([json valueForKey:@"opacity"]) {
-    [marker setOpacity:[[json valueForKey:@"opacity"] floatValue]];
+  if ([markerOptions valueForKey:@"opacity"]) {
+    [marker setOpacity:[[markerOptions valueForKey:@"opacity"] floatValue]];
   }
-  if ([json valueForKey:@"zIndex"]) {
-    [marker setZIndex:[[json valueForKey:@"zIndex"] intValue]];
+  if ([markerOptions valueForKey:@"zIndex"]) {
+    [marker setZIndex:[[markerOptions valueForKey:@"zIndex"] intValue]];
   }
 
   NSString *id = [NSString stringWithFormat:@"marker_%lu", (unsigned long)marker.hash];
@@ -62,14 +62,14 @@
   NSMutableDictionary *properties = [[NSMutableDictionary alloc] init];
   NSString *markerPropertyId = [NSString stringWithFormat:@"marker_property_%lu", (unsigned long)marker.hash];
 
-  if ([json valueForKey:@"styles"]) {
-    NSDictionary *styles = [json valueForKey:@"styles"];
+  if ([markerOptions valueForKey:@"styles"]) {
+    NSDictionary *styles = [markerOptions valueForKey:@"styles"];
     [properties setObject:styles forKey:@"styles"];
   }
 
   BOOL disableAutoPan = NO;
-  if ([json valueForKey:@"disableAutoPan"] != nil) {
-    disableAutoPan = [[json valueForKey:@"disableAutoPan"] boolValue];
+  if ([markerOptions valueForKey:@"disableAutoPan"] != nil) {
+    disableAutoPan = [[markerOptions valueForKey:@"disableAutoPan"] boolValue];
   }
   [properties setObject:[NSNumber numberWithBool:disableAutoPan] forKey:@"disableAutoPan"];
   [self.mapCtrl.overlayManager setObject:properties forKey: markerPropertyId];
@@ -77,22 +77,22 @@
 
   // Create icon
   NSMutableDictionary *iconProperty = nil;
-  NSObject *icon = [json valueForKey:@"icon"];
+  NSObject *icon = [markerOptions valueForKey:@"icon"];
   if ([icon isKindOfClass:[NSString class]]) {
     iconProperty = [NSMutableDictionary dictionary];
     [iconProperty setObject:icon forKey:@"url"];
 
   } else if ([icon isKindOfClass:[NSDictionary class]]) {
-    iconProperty = [json valueForKey:@"icon"];
+    iconProperty = [markerOptions valueForKey:@"icon"];
 
   } else if ([icon isKindOfClass:[NSArray class]]) {
-    NSArray *rgbColor = [json valueForKey:@"icon"];
+    NSArray *rgbColor = [markerOptions valueForKey:@"icon"];
     iconProperty = [NSMutableDictionary dictionary];
     [iconProperty setObject:[rgbColor parsePluginColor] forKey:@"iconColor"];
   }
 
   // Visible property
-  if ([[json valueForKey:@"visible"] boolValue] == true) {
+  if ([[markerOptions valueForKey:@"visible"] boolValue] == true) {
     iconProperty[@"visible"] = @YES;
   } else {
     iconProperty[@"visible"] = @NO;
@@ -100,8 +100,8 @@
 
   // Animation
   NSString *animation = nil;
-  if ([json valueForKey:@"animation"]) {
-    animation = [json valueForKey:@"animation"];
+  if ([markerOptions valueForKey:@"animation"]) {
+    animation = [markerOptions valueForKey:@"animation"];
     if (iconProperty) {
       [iconProperty setObject:animation forKey:@"animation"];
     }
@@ -117,8 +117,8 @@
 
   CDVPluginResult* pluginResult = nil;
   if (iconProperty) {
-    if ([json valueForKey:@"infoWindowAnchor"]) {
-      [iconProperty setObject:[json valueForKey:@"infoWindowAnchor"] forKey:@"infoWindowAnchor"];
+    if ([markerOptions valueForKey:@"infoWindowAnchor"]) {
+      [iconProperty setObject:[markerOptions valueForKey:@"infoWindowAnchor"] forKey:@"infoWindowAnchor"];
     }
 
     /*
@@ -133,7 +133,7 @@
     [self setIcon_:marker iconProperty:iconProperty pluginResult:pluginResult callbackId:command.callbackId];
 
   } else {
-    if ([[json valueForKey:@"visible"] boolValue] == true) {
+    if ([[markerOptions valueForKey:@"visible"] boolValue] == true) {
       marker.map = self.mapCtrl.map;
     }
     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:result];
