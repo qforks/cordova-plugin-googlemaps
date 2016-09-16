@@ -402,7 +402,7 @@ public class PluginMarker extends MyPlugin {
     private void setZIndex(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
         float zIndex = (float)args.getDouble(2);
         String id = args.getString(1);
-        this.setFloat("setZIndex", id, zIndex, callbackContext);    
+        this.setFloat("setZIndex", id, zIndex, callbackContext);
   }
 
   /**
@@ -670,17 +670,22 @@ public class PluginMarker extends MyPlugin {
 
   private void setIcon_(final Marker marker, final Bundle iconProperty, final PluginAsyncInterface callback) {
     if (iconProperty.containsKey("iconHue")) {
-      float hue = iconProperty.getFloat("iconHue");
-      marker.setIcon(BitmapDescriptorFactory.defaultMarker(hue));
-      callback.onPostExecute(marker);
+      cordova.getActivity().runOnUiThread(new Runnable() {
+        @Override
+        public void run() {
+          float hue = iconProperty.getFloat("iconHue");
+          marker.setIcon(BitmapDescriptorFactory.defaultMarker(hue));
+          callback.onPostExecute(marker);
+        }
+      });
       return;
     }
 
     String iconUrl = iconProperty.getString("url");
     if (iconUrl.indexOf("://") == -1 &&
-        iconUrl.startsWith("/") == false &&
-        iconUrl.startsWith("www/") == false &&
-        iconUrl.startsWith("data:image") == false) {
+      iconUrl.startsWith("/") == false &&
+      iconUrl.startsWith("www/") == false &&
+      iconUrl.startsWith("data:image") == false) {
       iconUrl = "./" + iconUrl;
     }
     if (iconUrl.indexOf("./") == 0) {
@@ -697,6 +702,9 @@ public class PluginMarker extends MyPlugin {
 
     if (iconUrl.indexOf("http") != 0) {
 
+      //----------------------------------
+      // Load icon from local file
+      //----------------------------------
       AsyncTask<Void, Void, Bitmap> task = new AsyncTask<Void, Void, Bitmap>() {
 
         @Override
@@ -713,7 +721,7 @@ public class PluginMarker extends MyPlugin {
             String[] tmp = iconUrl.split(",");
             image = PluginUtil.getBitmapFromBase64encodedImage(tmp[1]);
           } else if (iconUrl.indexOf("file://") == 0 &&
-              iconUrl.indexOf("file:///android_asset/") == -1) {
+            iconUrl.indexOf("file:///android_asset/") == -1) {
             iconUrl = iconUrl.replace("file://", "");
             File tmp = new File(iconUrl);
             if (tmp.exists()) {
@@ -764,9 +772,10 @@ public class PluginMarker extends MyPlugin {
             }
           }
 
-          if (isResized == false) {
+          if (!isResized) {
             image = PluginUtil.scaleBitmapForDevice(image);
           }
+
           return image;
         }
 
@@ -778,41 +787,41 @@ public class PluginMarker extends MyPlugin {
           }
 
           try {
-              //TODO: check image is valid?
-              BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(image);
-              marker.setIcon(bitmapDescriptor);
+            //TODO: check image is valid?
+            BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(image);
+            marker.setIcon(bitmapDescriptor);
 
-              // Save the information for the anchor property
-              Bundle imageSize = new Bundle();
-              imageSize.putInt("width", image.getWidth());
-              imageSize.putInt("height", image.getHeight());
-              PluginMarker.this.objects.put("imageSize", imageSize);
+            // Save the information for the anchor property
+            Bundle imageSize = new Bundle();
+            imageSize.putInt("width", image.getWidth());
+            imageSize.putInt("height", image.getHeight());
+            PluginMarker.this.objects.put("imageSize", imageSize);
 
 
-              // The `anchor` of the `icon` property
-              if (iconProperty.containsKey("anchor") == true) {
-                double[] anchor = iconProperty.getDoubleArray("anchor");
-                if (anchor.length == 2) {
-                  _setIconAnchor(marker, anchor[0], anchor[1], imageSize.getInt("width"), imageSize.getInt("height"));
-                }
+            // The `anchor` of the `icon` property
+            if (iconProperty.containsKey("anchor") == true) {
+              double[] anchor = iconProperty.getDoubleArray("anchor");
+              if (anchor.length == 2) {
+                _setIconAnchor(marker, anchor[0], anchor[1], imageSize.getInt("width"), imageSize.getInt("height"));
               }
+            }
 
 
-              // The `anchor` property for the infoWindow
-              if (iconProperty.containsKey("infoWindowAnchor") == true) {
-                double[] anchor = iconProperty.getDoubleArray("infoWindowAnchor");
-                if (anchor.length == 2) {
-                  _setInfoWindowAnchor(marker, anchor[0], anchor[1], imageSize.getInt("width"), imageSize.getInt("height"));
-                }
+            // The `anchor` property for the infoWindow
+            if (iconProperty.containsKey("infoWindowAnchor") == true) {
+              double[] anchor = iconProperty.getDoubleArray("infoWindowAnchor");
+              if (anchor.length == 2) {
+                _setInfoWindowAnchor(marker, anchor[0], anchor[1], imageSize.getInt("width"), imageSize.getInt("height"));
               }
+            }
 
-              callback.onPostExecute(marker);
+            callback.onPostExecute(marker);
 
-              } catch (java.lang.IllegalArgumentException e) {
-                        Log.e("GoogleMapsPlugin","PluginMarker: Warning - marker method called when marker has been disposed, wait for addMarker callback before calling more methods on the marker (setIcon etc).");
-                        //e.printStackTrace();
+          } catch (java.lang.IllegalArgumentException e) {
+            Log.e("GoogleMapsPlugin","PluginMarker: Warning - marker method called when marker has been disposed, wait for addMarker callback before calling more methods on the marker (setIcon etc).");
+            //e.printStackTrace();
 
-             }
+          }
         }
       };
       task.execute();
@@ -822,6 +831,9 @@ public class PluginMarker extends MyPlugin {
     }
 
     if (iconUrl.indexOf("http") == 0) {
+      //----------------------------------
+      // Load icon from on the internet
+      //----------------------------------
       int width = -1;
       int height = -1;
       if (iconProperty.containsKey("size") == true) {
@@ -871,8 +883,11 @@ public class PluginMarker extends MyPlugin {
 
       });
       task.execute(iconUrl);
+
+
     }
   }
+
 
   private void _setIconAnchor(Marker marker, double anchorX, double anchorY, int imageWidth, int imageHeight) {
     // The `anchor` of the `icon` property
