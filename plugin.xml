@@ -90,6 +90,9 @@
             <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
             <!-- OpenGL ES version 2 -->
             <uses-feature android:glEsVersion="0x00020000" android:required="true" />
+            <!-- GPS -->
+            <uses-feature android:name="android.hardware.location" />
+            <uses-feature android:name="android.hardware.location.gps" />
         </config-file>
     </platform>
 
@@ -201,6 +204,13 @@
         <preference name="NSLocationAlwaysUsageDescription" default="Trace your location on the map" />
         <config-file target="*-Info.plist" parent="NSLocationAlwaysUsageDescription">
             <string>$NSLocationAlwaysUsageDescription</string>
+        </config-file>
+
+        <config-file target="*-Info.plist" parent="LSApplicationQueriesSchemes">
+          <array>
+            <string>googlechromes</string>
+            <string>comgooglemaps</string>
+          </array>
         </config-file>
 
         <config-file target="*-Info.plist" parent="CFBundleURLTypes">
