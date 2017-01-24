@@ -199,25 +199,80 @@ NSDictionary *initOptions;
       }
     }
   
-    //mapType
-    NSString *typeStr = [initOptions valueForKey:@"mapType"];
-    if (typeStr) {
-      
-      NSDictionary *mapTypes = [NSDictionary dictionaryWithObjectsAndKeys:
-                                ^() {return kGMSTypeHybrid; }, @"MAP_TYPE_HYBRID",
-                                ^() {return kGMSTypeSatellite; }, @"MAP_TYPE_SATELLITE",
-                                ^() {return kGMSTypeTerrain; }, @"MAP_TYPE_TERRAIN",
-                                ^() {return kGMSTypeNormal; }, @"MAP_TYPE_NORMAL",
-                                ^() {return kGMSTypeNone; }, @"MAP_TYPE_NONE",
-                                nil];
-      
-      typedef GMSMapViewType (^CaseBlock)();
-      GMSMapViewType mapType;
-      CaseBlock caseBlock = mapTypes[typeStr];
-      if (caseBlock) {
-        // Change the map type
-        mapType = caseBlock();
-        self.map.mapType = mapType;
+    //preferences
+    NSDictionary *preferences = [initOptions objectForKey:@"preferences"];
+    if (preferences) {
+      //padding
+      if ([preferences valueForKey:@"padding"] != nil) {
+        NSDictionary *padding = [preferences valueForKey:@"padding"];
+        UIEdgeInsets current = self.map.padding;
+        if ([padding objectForKey:@"left"] != nil) {
+          current.left = [[padding objectForKey:@"left"] floatValue];
+        }
+        if ([padding objectForKey:@"top"] != nil) {
+          current.top = [[padding objectForKey:@"top"] floatValue];
+        }
+        if ([padding objectForKey:@"bottom"] != nil) {
+          current.bottom = [[padding objectForKey:@"bottom"] floatValue];
+        }
+        if ([padding objectForKey:@"right"] != nil) {
+          current.right = [[padding objectForKey:@"right"] floatValue];
+        }
+        
+        UIEdgeInsets newPadding = UIEdgeInsetsMake(current.top, current.left, current.bottom, current.right);
+        [self.map setPadding:newPadding];
+      }
+      //zoom
+      if ([preferences valueForKey:@"zoom"] != nil) {
+        NSDictionary *zoom = [preferences valueForKey:@"zoom"];
+        float minZoom = self.map.minZoom;
+        float maxZoom = self.map.maxZoom;
+        if ([zoom objectForKey:@"minZoom"] != nil) {
+          minZoom = [[zoom objectForKey:@"minZoom"] doubleValue];
+        }
+        if ([zoom objectForKey:@"maxZoom"] != nil) {
+          maxZoom = [[zoom objectForKey:@"maxZoom"] doubleValue];
+        }
+        
+        [self.map setMinZoom:minZoom maxZoom:maxZoom];
+      }
+      // building
+      if ([preferences valueForKey:@"building"] != nil) {
+        self.map.buildingsEnabled = [[preferences valueForKey:@"building"] boolValue];
+      }
+    }
+  
+    NSString *styles = [initOptions valueForKey:@"styles"];
+    if (styles) {
+      NSError *error;
+      GMSMapStyle *mapStyle = [GMSMapStyle styleWithJSONString:styles error:&error];
+      if (mapStyle != nil) {
+        self.map.mapStyle = mapStyle;
+        self.map.mapType = kGMSTypeNormal;
+      } else {
+        NSLog(@"Your specified map style is incorrect : %@", error.description);
+      }
+    } else {
+      //mapType
+      NSString *typeStr = [initOptions valueForKey:@"mapType"];
+      if (typeStr) {
+        
+        NSDictionary *mapTypes = [NSDictionary dictionaryWithObjectsAndKeys:
+                                  ^() {return kGMSTypeHybrid; }, @"MAP_TYPE_HYBRID",
+                                  ^() {return kGMSTypeSatellite; }, @"MAP_TYPE_SATELLITE",
+                                  ^() {return kGMSTypeTerrain; }, @"MAP_TYPE_TERRAIN",
+                                  ^() {return kGMSTypeNormal; }, @"MAP_TYPE_NORMAL",
+                                  ^() {return kGMSTypeNone; }, @"MAP_TYPE_NONE",
+                                  nil];
+        
+        typedef GMSMapViewType (^CaseBlock)();
+        GMSMapViewType mapType;
+        CaseBlock caseBlock = mapTypes[typeStr];
+        if (caseBlock) {
+          // Change the map type
+          mapType = caseBlock();
+          self.map.mapType = mapType;
+        }
       }
     }
   

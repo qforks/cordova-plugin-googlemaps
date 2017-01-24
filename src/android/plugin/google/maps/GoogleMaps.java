@@ -76,6 +76,7 @@ import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.IndoorBuilding;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.Polyline;
@@ -501,7 +502,7 @@ public class GoogleMaps extends CordovaPlugin implements View.OnClickListener, O
     }
 
     // map type
-    if (params.has("mapType")) {
+    if (!params.has("styles") && params.has("mapType")) {
       String typeStr = params.getString("mapType");
       int mapTypeId = -1;
       mapTypeId = typeStr.equals("MAP_TYPE_NORMAL") ? GoogleMap.MAP_TYPE_NORMAL
@@ -559,6 +560,13 @@ public class GoogleMaps extends CordovaPlugin implements View.OnClickListener, O
         map = googleMap;
 
         try {
+          //styles
+          if (params.has("styles")) {
+            String styles = params.getString("styles");
+            MapStyleOptions styleOptions = new MapStyleOptions(styles);
+            map.setMapStyle(styleOptions);
+            map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+          }
           //controls
           if (params.has("controls")) {
             JSONObject controls = params.getJSONObject("controls");
@@ -603,6 +611,40 @@ public class GoogleMaps extends CordovaPlugin implements View.OnClickListener, O
             }
           }
 
+          if (params.has("preferences")) {
+            JSONObject preferences = params.getJSONObject("preferences");
+
+            if (preferences.has("padding")) {
+              JSONObject padding = preferences.getJSONObject("padding");
+              int left = 0, top = 0, bottom = 0, right = 0;
+              if (padding.has("left")) {
+                left = (int) (padding.getInt("left") * density);
+              }
+              if (padding.has("top")) {
+                top = (int) (padding.getInt("top") * density);
+              }
+              if (padding.has("bottom")) {
+                bottom = (int) (padding.getInt("bottom") * density);
+              }
+              if (padding.has("right")) {
+                right = (int) (padding.getInt("right") * density);
+              }
+              map.setPadding(left, top, right, bottom);
+            }
+
+            if (preferences.has("zoom")) {
+              JSONObject zoom = preferences.getJSONObject("zoom");
+              if (zoom.has("minZoom")) {
+                map.setMinZoomPreference((float)zoom.getDouble("minZoom"));
+              }
+              if (zoom.has("maxZoom")) {
+                map.setMaxZoomPreference((float)zoom.getDouble("maxZoom"));
+              }
+            }
+            if (preferences.has("building")) {
+              map.setBuildingsEnabled(preferences.getBoolean("building"));
+            }
+          }
 
           if (params.has("controls")) {
             JSONObject controls = params.getJSONObject("controls");
@@ -625,6 +667,8 @@ public class GoogleMaps extends CordovaPlugin implements View.OnClickListener, O
           } else {
             callbackContext.success();
           }
+
+
 
         } catch (Exception e) {
           Log.d("GoogleMaps", "------->error");
@@ -1039,7 +1083,7 @@ public class GoogleMaps extends CordovaPlugin implements View.OnClickListener, O
 
   private void _checkLocationSettings(final boolean enableHighAccuracy, final CallbackContext callbackContext) {
 
-    LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
+    LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().setAlwaysShow(true);
 
     LocationRequest locationRequest;
     locationRequest = LocationRequest.create()

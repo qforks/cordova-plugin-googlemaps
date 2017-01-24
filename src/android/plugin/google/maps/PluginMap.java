@@ -27,6 +27,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.CameraPosition.Builder;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.VisibleRegion;
 
 public class PluginMap extends MyPlugin {
@@ -86,22 +87,30 @@ public class PluginMap extends MyPlugin {
       }
     }
 
-    // map type
-    if (params.has("mapType")) {
-      String typeStr = params.getString("mapType");
-      int mapTypeId = -1;
-      mapTypeId = typeStr.equals("MAP_TYPE_NORMAL") ? GoogleMap.MAP_TYPE_NORMAL
-          : mapTypeId;
-      mapTypeId = typeStr.equals("MAP_TYPE_HYBRID") ? GoogleMap.MAP_TYPE_HYBRID
-          : mapTypeId;
-      mapTypeId = typeStr.equals("MAP_TYPE_SATELLITE") ? GoogleMap.MAP_TYPE_SATELLITE
-          : mapTypeId;
-      mapTypeId = typeStr.equals("MAP_TYPE_TERRAIN") ? GoogleMap.MAP_TYPE_TERRAIN
-          : mapTypeId;
-      mapTypeId = typeStr.equals("MAP_TYPE_NONE") ? GoogleMap.MAP_TYPE_NONE
-          : mapTypeId;
-      if (mapTypeId != -1) {
-        this.map.setMapType(mapTypeId);
+    //styles
+    if (params.has("styles")) {
+      String styles = params.getString("styles");
+      MapStyleOptions styleOptions = new MapStyleOptions(styles);
+      map.setMapStyle(styleOptions);
+      map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+    } else {
+      // map type
+      if (params.has("mapType")) {
+        String typeStr = params.getString("mapType");
+        int mapTypeId = -1;
+        mapTypeId = typeStr.equals("MAP_TYPE_NORMAL") ? GoogleMap.MAP_TYPE_NORMAL
+            : mapTypeId;
+        mapTypeId = typeStr.equals("MAP_TYPE_HYBRID") ? GoogleMap.MAP_TYPE_HYBRID
+            : mapTypeId;
+        mapTypeId = typeStr.equals("MAP_TYPE_SATELLITE") ? GoogleMap.MAP_TYPE_SATELLITE
+            : mapTypeId;
+        mapTypeId = typeStr.equals("MAP_TYPE_TERRAIN") ? GoogleMap.MAP_TYPE_TERRAIN
+            : mapTypeId;
+        mapTypeId = typeStr.equals("MAP_TYPE_NONE") ? GoogleMap.MAP_TYPE_NONE
+            : mapTypeId;
+        if (mapTypeId != -1) {
+          this.map.setMapType(mapTypeId);
+        }
       }
     }
 
@@ -145,6 +154,41 @@ public class PluginMap extends MyPlugin {
       map.moveCamera(CameraUpdateFactory.newCameraPosition(builder.build()));
       if (cameraBounds != null) {
         mapCtrl.fitBounds(cameraBounds);
+      }
+    }
+
+
+    if (params.has("preferences")) {
+      JSONObject preferences = params.getJSONObject("preferences");
+      if (preferences.has("padding")) {
+        JSONObject padding = preferences.getJSONObject("padding");
+        int left = 0, top = 0, bottom = 0, right = 0;
+        if (padding.has("left")) {
+          left = (int) (padding.getInt("left") * density);
+        }
+        if (padding.has("top")) {
+          top = (int) (padding.getInt("top") * density);
+        }
+        if (padding.has("bottom")) {
+          bottom = (int) (padding.getInt("bottom") * density);
+        }
+        if (padding.has("right")) {
+          right = (int) (padding.getInt("right") * density);
+        }
+        map.setPadding(left, top, right, bottom);
+      }
+
+      if (preferences.has("zoom")) {
+        JSONObject zoom = preferences.getJSONObject("zoom");
+        if (zoom.has("minZoom")) {
+          map.setMinZoomPreference((float)zoom.getDouble("minZoom"));
+        }
+        if (zoom.has("maxZoom")) {
+          map.setMaxZoomPreference((float)zoom.getDouble("maxZoom"));
+        }
+      }
+      if (preferences.has("building")) {
+        map.setBuildingsEnabled(preferences.getBoolean("building"));
       }
     }
 
