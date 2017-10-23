@@ -440,6 +440,10 @@ Map.prototype.setIndoorEnabled = function(enabled) {
     exec.call(this, null, this.errorHandler, this.id, 'setIndoorEnabled', [enabled]);
     return this;
 };
+Map.prototype.setMapToolbarEnabled = function(enabled) {
+    enabled = common.parseBoolean(enabled);
+    exec.call(this, null, this.errorHandler, this.id, 'setMapToolbarEnabled', [enabled]);
+};
 Map.prototype.setTrafficEnabled = function(enabled) {
     enabled = common.parseBoolean(enabled);
     exec.call(this, null, this.errorHandler, this.id, 'setTrafficEnabled', [enabled]);

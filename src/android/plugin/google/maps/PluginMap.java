@@ -252,7 +252,6 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
                   Boolean isEnabled = controls.getBoolean("indoorPicker");
                   map.setIndoorEnabled(isEnabled);
                 }
-
               }
               //preferences
               if (params.has("preferences")) {
@@ -1684,6 +1683,24 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
       @Override
       public void run() {
         map.setIndoorEnabled(isEnabled);
+        callbackContext.success();
+      }
+    });
+  }
+
+  /**
+   * Enable the map toolbar if set true
+   * @param args
+   * @param callbackContext
+   * @throws JSONException
+   */
+  public void setMapToolbarEnabled(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
+    final Boolean isEnabled = args.getBoolean(0);
+    this.activity.runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        UiSettings uiSettings = map.getUiSettings();
+        uiSettings.setMapToolbarEnabled(isEnabled);
         callbackContext.success();
       }
     });

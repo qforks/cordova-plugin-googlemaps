@@ -30,6 +30,7 @@
 - (void)moveCamera:(CDVInvokedUrlCommand*)command;
 - (void)setMyLocationEnabled:(CDVInvokedUrlCommand*)command;
 - (void)setIndoorEnabled:(CDVInvokedUrlCommand*)command;
+- (void)setMapToolbarEnabled:(CDVInvokedUrlCommand*)command;
 - (void)setTrafficEnabled:(CDVInvokedUrlCommand*)command;
 - (void)setCompassEnabled:(CDVInvokedUrlCommand*)command;
 //- (void)getCameraPosition:(CDVInvokedUrlCommand*)command;

@@ -284,6 +284,13 @@
   [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+- (void)setMapToolbarEnabled:(CDVInvokedUrlCommand *)command {
+  // Stub - this feature is not available on iOS. Prevent crashes by returning OK status.
+
+  CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+  [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
 - (void)setTrafficEnabled:(CDVInvokedUrlCommand *)command {
   [[NSOperationQueue mainQueue] addOperationWithBlock:^{
     Boolean isEnabled = [[command.arguments objectAtIndex:0] boolValue];
