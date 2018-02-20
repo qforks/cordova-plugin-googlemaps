@@ -41,16 +41,20 @@ var TileOverlay = function(map, tileOverlayId, tileOverlayOptions, _exec) {
     //-----------------------------------------------
     // Sets event listeners
     //-----------------------------------------------
-    self.on("fadeIn_changed", function(oldValue, fadeIn) {
+    self.on("fadeIn_changed", function() {
+        var fadeIn = self.get("fadeIn");
         exec.call(self, null, self.errorHandler, self.getPluginName(), 'setFadeIn', [self.getId(), fadeIn]);
     });
-    self.on("opacity_changed", function(oldValue, opacity) {
+    self.on("opacity_changed", function() {
+        var opacity = self.get("opacity");
         exec.call(self, null, self.errorHandler, self.getPluginName(), 'setOpacity', [self.getId(), opacity]);
     });
-    self.on("zIndex_changed", function(oldValue, zIndex) {
+    self.on("zIndex_changed", function() {
+        var zIndex = self.get("zIndex");
         exec.call(self, null, self.errorHandler, self.getPluginName(), 'setZIndex', [self.getId(), zIndex]);
     });
-    self.on("visible_changed", function(oldValue, visible) {
+    self.on("visible_changed", function() {
+        var visible = self.get("visible");
         exec.call(self, null, self.errorHandler, self.getPluginName(), 'setVisible', [self.getId(), visible]);
     });
 };
@@ -106,14 +110,22 @@ TileOverlay.prototype.getVisible = function() {
     return this.get('visible');
 };
 
-TileOverlay.prototype.remove = function() {
-    this.trigger(this.id + "_remove");
-    exec.call(this, null, this.errorHandler, this.getPluginName(), 'remove', [this.getId()]);
+TileOverlay.prototype.remove = function(callback) {
+    var self = this;
+    if (self._isRemoved) {
+      return;
+    }
     Object.defineProperty(self, "_isRemoved", {
         value: true,
         writable: false
     });
-    this.destroy();
+    self.trigger(self.id + "_remove");
+    exec.call(self, function() {
+        self.destroy();
+        if (typeof callback === "function") {
+            callback.call(self);
+        }
+    }, self.errorHandler, self.getPluginName(), 'remove', [self.getId()], {remove: true});
 };
 
 module.exports = TileOverlay;

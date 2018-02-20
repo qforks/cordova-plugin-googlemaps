@@ -60,22 +60,28 @@ var Polyline = function(map, polylineId, polylineOptions, _exec) {
     //-----------------------------------------------
     // Sets event listeners
     //-----------------------------------------------
-    self.on("geodesic_changed", function(oldValue, geodesic) {
+    self.on("geodesic_changed", function() {
+        var geodesic = self.get("geodesic");
         exec.call(self, null, self.errorHandler, self.getPluginName(), 'setGeodesic', [self.getId(), geodesic]);
     });
-    self.on("zIndex_changed", function(oldValue, zIndex) {
+    self.on("zIndex_changed", function() {
+        var zIndex = self.get("zIndex");
         exec.call(self, null, self.errorHandler, self.getPluginName(), 'setZIndex', [self.getId(), zIndex]);
     });
-    self.on("clickable_changed", function(oldValue, clickable) {
+    self.on("clickable_changed", function() {
+        var clickable = self.get("clickable");
         exec.call(self, null, self.errorHandler, self.getPluginName(), 'setClickable', [self.getId(), clickable]);
     });
-    self.on("visible_changed", function(oldValue, visible) {
+    self.on("visible_changed", function() {
+        var visible = self.get("visible");
         exec.call(self, null, self.errorHandler, self.getPluginName(), 'setVisible', [self.getId(), visible]);
     });
-    self.on("strokeWidth_changed", function(oldValue, width) {
-        exec.call(self, null, self.errorHandler, self.getPluginName(), 'setStrokeWidth', [self.getId(), width]);
+    self.on("strokeWidth_changed", function() {
+        var strokeWidth = self.get("strokeWidth");
+        exec.call(self, null, self.errorHandler, self.getPluginName(), 'setStrokeWidth', [self.getId(), strokeWidth]);
     });
-    self.on("strokeColor_changed", function(oldValue, color) {
+    self.on("strokeColor_changed", function() {
+        var color = self.get("strokeColor");
         exec.call(self, null, self.errorHandler, self.getPluginName(), 'setStrokeColor', [self.getId(), common.HTMLColor2RGBA(color, 0.75)]);
     });
 
@@ -166,16 +172,24 @@ Polyline.prototype.getMap = function() {
 };
 
 Polyline.prototype.remove = function() {
-    exec.call(this, null, this.errorHandler, this.getPluginName(), 'remove', [this.getId()]);
-    this.trigger(this.id + "_remove");
-    var points = this.get("points");
-    if (points) {
-      points.clear();
+    var self = this;
+    if (self._isRemoved) {
+      return;
     }
     Object.defineProperty(self, "_isRemoved", {
         value: true,
         writable: false
     });
-    this.destroy();
+    exec.call(self, function() {
+        self.destroy();
+        if (typeof callback === "function") {
+            callback.call(self);
+        }
+    }, self.errorHandler, self.getPluginName(), 'remove', [self.getId()], {remove: true});
+    self.trigger(self.id + "_remove");
+    var points = self.get("points");
+    if (points) {
+      points.clear();
+    }
 };
 module.exports = Polyline;
