@@ -34,7 +34,8 @@
 - (void)setMapToolbarEnabled:(CDVInvokedUrlCommand*)command;
 - (void)setTrafficEnabled:(CDVInvokedUrlCommand*)command;
 - (void)setCompassEnabled:(CDVInvokedUrlCommand*)command;
-//- (void)getCameraPosition:(CDVInvokedUrlCommand*)command;
+- (void)attachMap:(CDVInvokedUrlCommand*)command;
+- (void)detachMap:(CDVInvokedUrlCommand*)command;
 - (void)toDataURL:(CDVInvokedUrlCommand*)command;
 - (void)setOptions:(CDVInvokedUrlCommand*)command;
 - (void)setAllGesturesEnabled:(CDVInvokedUrlCommand*)command;
